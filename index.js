@@ -2,19 +2,20 @@ const cheerio = require('cheerio');
 const express = require('express');
 const puppeteer = require('puppeteer');
 const { Cluster } = require('puppeteer-cluster');
-require('dotenv').config()
+require('dotenv').config();
 
 const cors = require('cors');
 const app = express();
 
 const port = process.env.PORT || 3000;
 
-
 app.use(cors());
 const url = 'https://www.theguardian.com/uk';
 
 const webScarping = async (res) => {
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    ignoreDefaultArgs: ['--disable-extensions'],
+  });
 
   const page = await browser.newPage();
 
