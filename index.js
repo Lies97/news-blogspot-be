@@ -2,10 +2,15 @@ const cheerio = require('cheerio');
 const express = require('express');
 const puppeteer = require('puppeteer');
 const { Cluster } = require('puppeteer-cluster');
+require('dotenv').config()
+
 const cors = require('cors');
 const app = express();
 
-app.use(cors())
+const port = process.env.PORT || 3000;
+
+
+app.use(cors());
 const url = 'https://www.theguardian.com/uk';
 
 const webScarping = async (res) => {
@@ -19,7 +24,7 @@ const webScarping = async (res) => {
   const $ = cheerio.load(html);
 
   const articles = [];
-  
+
   const cluster = await Cluster.launch({
     concurrency: Cluster.CONCURRENCY_BROWSER,
     maxConcurrency: 100,
@@ -36,12 +41,11 @@ const webScarping = async (res) => {
     cluster.queue(article);
   });
 
-
   await cluster.task(async ({ page, data: article }) => {
     const { title, url, thumbnail } = article;
     await page.goto(url, {
       waitUntil: 'load',
-      timeout: 0
+      timeout: 0,
     });
     const html = await page.content();
     const $ = cheerio.load(html);
@@ -61,6 +65,7 @@ app.get('/articles', (req, res) => {
   webScarping(res);
 });
 
-app.listen(process.env.PORT || 8000, () => {
-  console.log(`Web Scarper is running on PORT ${process.env.PORT}`);
+app.listen(port, '0.0.0.0', () => {
+  console.log(process.env);
+  console.log(`Web Scarper is running on PORT ${port}`);
 });
