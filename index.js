@@ -3,8 +3,6 @@ const express = require('express');
 const puppeteer = require('puppeteer');
 const { Cluster } = require('puppeteer-cluster');
 
-const PORT = process.env.PORT || 8000;
-
 const app = express();
 
 app.enableCors();
@@ -63,6 +61,6 @@ app.get('/articles', (req, res) => {
   webScarping(res);
 });
 
-app.listen(PORT, () => {
-  console.log(`Web Scarper is running on PORT ${PORT}`);
+app.listen(process.env.PORT || 8000, () => {
+  console.log(`Web Scarper is running on PORT ${process.env.PORT}`);
 });
