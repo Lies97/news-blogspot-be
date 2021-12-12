@@ -2,10 +2,10 @@ const cheerio = require('cheerio');
 const express = require('express');
 const puppeteer = require('puppeteer');
 const { Cluster } = require('puppeteer-cluster');
-
+const cors = require('cors');
 const app = express();
 
-app.enableCors();
+app.use(cors())
 const url = 'https://www.theguardian.com/uk';
 
 const webScarping = async (res) => {
