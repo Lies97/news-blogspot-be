@@ -1,13 +1,14 @@
 const cheerio = require('cheerio');
 const express = require('express');
 const puppeteer = require('puppeteer');
-const { Cluster } = require('puppeteer-cluster');
 require('dotenv').config();
 
 const cors = require('cors');
 const app = express();
 
 const port = process.env.PORT || 3000;
+
+const articles = [];
 
 app.use(cors());
 const url = 'https://www.theguardian.com/uk';
@@ -25,18 +26,7 @@ const webScarping = async (res) => {
   const html = await page.content();
   const $ = cheerio.load(html);
 
-  const articles = [];
-
-  const cluster = await Cluster.launch({
-    concurrency: Cluster.CONCURRENCY_BROWSER,
-    maxConcurrency: 100,
-    puppeteerOptions: {
-      headless: true,
-      args: ['--no-sandbox'],
-    },
-  });
-
-  $('.fc-item__container', html).each(function () {
+  $('.fc-item__container', html).each(async function () {
     const title = $(this).find('.fc-item__title').text();
     const url = $(this).find('a').attr('href');
     const thumbnail = $(this)
@@ -44,34 +34,81 @@ const webScarping = async (res) => {
       .attr('src');
 
     const article = { title, url, thumbnail };
-    cluster.queue(article);
+    articles.push(article);
+    articles.forEach((article, i) => {
+      article['id'] = i;
+    });
   });
 
-  await cluster.task(async ({ page, data: article }) => {
-    const { title, url, thumbnail } = article;
-    await page.goto(url, {
-      waitUntil: 'load',
-      timeout: 0,
-    });
+  console.log('articles', articles);
+  res.send(articles);
+};
+
+const scarpArticle = async (urlLink, res) => {
+  const browser = await puppeteer.launch({
+    ignoreDefaultArgs: ['--disable-extensions'],
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  });
+
+  if (articles.length > 0) {
+    const article = articles.find((article) => article.url.includes(urlLink));
+    const newPage = await browser.newPage();
+    await newPage.goto(article.url);
+
+    const html = await newPage.content();
+    const $ = cheerio.load(html);
+    const content = $('.article-body-commercial-selector').text();
+    console.log('content', content);
+    article['content'] = content;
+    res.send(article);
+    newPage.close();
+  } else {
+
+    const page = await browser.newPage();
+    const articlesArray = [];
+    await page.goto(url);
+
     const html = await page.content();
     const $ = cheerio.load(html);
 
-    const content = $('.article-body-commercial-selector').text();
+    $('.fc-item__container', html).each(async function () {
+      const title = $(this).find('.fc-item__title').text();
+      const link = $(this).find('a').attr('href');
+      const thumbnail = $(this)
+        .find('.fc-item__image-container > picture > img')
+        .attr('src');
 
-    articles.push({ title, content, url, thumbnail });
-    await page.close();
-  });
+      const article = { title, url: link, thumbnail };
 
-  await cluster.idle();
-  await cluster.close();
-  res.send(articles);
+      setTimeout(async () => {
+        if (article.url.includes(urlLink)) {
+          const newPage = await browser.newPage();
+          await newPage.goto(article.url);
+  
+          console.log(article.url);
+          const html = await newPage.content();
+          const $$ = cheerio.load(html);
+          const content = $$('.article-body-commercial-selector').text();
+          console.log('content', content);
+          article['content'] = content;
+          articlesArray.push(article);
+
+          newPage.close();
+          res.send(article);
+        }
+      }, 1000)
+    });
+  }
 };
 
 app.get('/articles', (req, res) => {
   webScarping(res);
 });
 
+app.get('/article/:url', (req, res) => {
+  scarpArticle(req.params.url, res);
+});
+
 app.listen(port, '0.0.0.0', () => {
-  console.log(process.env);
   console.log(`Web Scarper is running on PORT ${port}`);
 });
