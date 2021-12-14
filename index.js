@@ -4,13 +4,17 @@ const puppeteer = require('puppeteer');
 require('dotenv').config();
 
 const cors = require('cors');
+var corsOptions = {
+  origin: '*',
+  optionsSuccessStatus: 200,
+};
 const app = express();
 
 const port = process.env.PORT || 3000;
 
 const articles = [];
 
-app.use(cors());
+app.use(cors(corsOptions));
 const url = 'https://www.theguardian.com/uk';
 
 const webScarping = async (res) => {
@@ -63,7 +67,6 @@ const scarpArticle = async (urlLink, res) => {
     res.send(article);
     newPage.close();
   } else {
-
     const page = await browser.newPage();
     const articlesArray = [];
     await page.goto(url);
@@ -84,7 +87,7 @@ const scarpArticle = async (urlLink, res) => {
         if (article.url.includes(urlLink)) {
           const newPage = await browser.newPage();
           await newPage.goto(article.url);
-  
+
           console.log(article.url);
           const html = await newPage.content();
           const $$ = cheerio.load(html);
@@ -96,7 +99,7 @@ const scarpArticle = async (urlLink, res) => {
           newPage.close();
           res.send(article);
         }
-      }, 1000)
+      }, 1000);
     });
   }
 };
