@@ -45,6 +45,10 @@ const webScarping = async (res) => {
   });
 
   console.log('articles', articles);
+  articles = Array.from(new Set(articles.map(a => a.title)))
+  .map(title => {
+    return articles.find(a => a.title === title)
+  })
   res.send(articles);
 };
 
