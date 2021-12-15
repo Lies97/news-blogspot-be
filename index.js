@@ -37,18 +37,18 @@ const webScarping = async (res) => {
       .find('.fc-item__image-container > picture > img')
       .attr('src');
 
-    const article = { title, url, thumbnail };
-    articles.push(article);
-    articles.forEach((article, i) => {
-      article['id'] = i;
-    });
+    const description = $(this).find('.fc-item__standfirst').text();
+    const article = { title, url, thumbnail, description };
+    if (article.thumbnail) {
+      articles.push(article)
+    };
   });
 
-  console.log('articles', articles);
   articles = Array.from(new Set(articles.map(a => a.title)))
   .map(title => {
     return articles.find(a => a.title === title)
   })
+
   res.send(articles);
 };
 
