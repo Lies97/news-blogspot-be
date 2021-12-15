@@ -66,7 +66,6 @@ const scarpArticle = async (urlLink, res) => {
     const html = await newPage.content();
     const $ = cheerio.load(html);
     const content = $('.article-body-commercial-selector').text();
-    console.log('content', content);
     article['content'] = content;
     res.send(article);
     newPage.close();
