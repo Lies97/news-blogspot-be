@@ -108,11 +108,11 @@ const scarpArticle = async (urlLink, res) => {
   }
 };
 
-app.get('/articles', (req, res) => {
+app.get('/api/articles', (req, res) => {
   webScarping(res);
 });
 
-app.get('/article/:url', (req, res) => {
+app.get('/api/article/:url', (req, res) => {
   scarpArticle(req.params.url, res);
 });
 
