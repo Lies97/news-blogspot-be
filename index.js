@@ -37,7 +37,7 @@ const webScarping = async (res) => {
       .find('.fc-item__image-container > picture > img')
       .attr('src');
 
-    const description = $(this).find('.fc-item__standfirst').text();
+    const description = $(this).find('.fc-item__standfirst').text().replace("\n", '').trim();
     const article = { title, url, thumbnail, description };
     if (article.thumbnail) {
       articles.push(article)
