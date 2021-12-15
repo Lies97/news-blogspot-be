@@ -39,7 +39,7 @@ const webScarping = async (res) => {
 
     const description = $(this).find('.fc-item__standfirst').text().replace("\n", '').trim();
     const article = { title, url, thumbnail, description };
-    if (article.thumbnail) {
+    if (article.thumbnail && article.url && article.thumbnail && article.description) {
       articles.push(article)
     };
   });
