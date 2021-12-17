@@ -64,19 +64,19 @@ const scarpArticle = async (urlLink, res) => {
     await newPage.goto(article.url);
 
     const html = await newPage.content();
-    const $ = cheerio.load(html);
+    const $$ = cheerio.load(html);
     const sections = [];
-    // const content = $('.article-body-commercial-selector').text();
-    // article['content'] = content;
+    const image = $$('picture > img').attr('src');
+
     $$('.article-body-commercial-selector > p', html).each(async function(a) {
       sections.push($$(this).text());
     });
 
+    article['image'] = image;
     article['contentSections'] = sections;
     res.send(article);
     newPage.close();
   } else {
-    console.log('y');
     const page = await browser.newPage();
     const articlesArray = [];
     await page.goto(url);
@@ -101,13 +101,13 @@ const scarpArticle = async (urlLink, res) => {
           console.log(article.url);
           const html = await newPage.content();
           const $$ = cheerio.load(html);
-          let content = '';
-          // const content = $$('.article-body-commercial-selector').text();
           $$('.article-body-commercial-selector > p', html).each(async function(a) {
             sections.push($$(this).text());
           });
 
+          const image = $$('picture > img').attr('src');
           article['contentSections'] = sections;
+          article['image'] = image;
           articlesArray.push(article);
 
           newPage.close();
