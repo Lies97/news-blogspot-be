@@ -10,7 +10,7 @@ var corsOptions = {
 };
 const app = express();
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 4000;
 
 let articles = [];
 
@@ -59,6 +59,7 @@ const scarpArticle = async (urlLink, res) => {
   });
 
   if (articles.length > 0) {
+    console.log('x');
     const article = articles.find((article) => article.url.includes(urlLink));
     const newPage = await browser.newPage();
     await newPage.goto(article.url);
@@ -70,6 +71,7 @@ const scarpArticle = async (urlLink, res) => {
     res.send(article);
     newPage.close();
   } else {
+    console.log('y');
     const page = await browser.newPage();
     const articlesArray = [];
     await page.goto(url);
@@ -90,12 +92,16 @@ const scarpArticle = async (urlLink, res) => {
         if (article.url.includes(urlLink)) {
           const newPage = await browser.newPage();
           await newPage.goto(article.url);
-
+          const sections = [];
           console.log(article.url);
           const html = await newPage.content();
           const $$ = cheerio.load(html);
-          const content = $$('.article-body-commercial-selector').text();
-          console.log('content', content);
+          // const content = $$('.article-body-commercial-selector').text();
+          let content = ''
+          $$('.article-body-commercial-selector > p', html).each(async function(a) {
+            content = $$(this).text();
+          });
+
           article['content'] = content;
           articlesArray.push(article);
 
