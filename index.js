@@ -12,7 +12,7 @@ const app = express();
 
 const port = process.env.PORT || 4000;
 
-let articles = [];
+let articles = []
 
 app.use(cors(corsOptions));
 const url = 'https://www.theguardian.com/uk';
