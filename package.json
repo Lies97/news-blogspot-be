@@ -19,6 +19,6 @@
     "express": "^4.17.1",
     "nodemon": "^2.0.15",
     "puppeteer": "^5.0.0",
-    "puppeteer-cluster": "^0.22.0"
+    "puppeteer-core": "^13.0.0"
   }
 }
