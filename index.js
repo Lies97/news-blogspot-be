@@ -37,25 +37,17 @@ const webScarping = async (res) => {
       .find('.fc-item__image-container > picture > img')
       .attr('src');
 
-    const description = $(this)
-      .find('.fc-item__standfirst')
-      .text()
-      .replace('\n', '')
-      .trim();
+    const description = $(this).find('.fc-item__standfirst').text().replace("\n", '').trim();
     const article = { title, url, thumbnail, description };
-    if (
-      article.thumbnail &&
-      article.url &&
-      article.thumbnail &&
-      article.description
-    ) {
-      articles.push(article);
-    }
+    if (article.thumbnail && article.url && article.thumbnail && article.description) {
+      articles.push(article)
+    };
   });
 
-  articles = Array.from(new Set(articles.map((a) => a.title))).map((title) => {
-    return articles.find((a) => a.title === title);
-  });
+  articles = Array.from(new Set(articles.map(a => a.title)))
+  .map(title => {
+    return articles.find(a => a.title === title)
+  })
 
   res.send(articles);
 };
@@ -73,16 +65,18 @@ const scarpArticle = async (urlLink, res) => {
 
     const html = await newPage.content();
     const $ = cheerio.load(html);
+    const sections = [];
     // const content = $('.article-body-commercial-selector').text();
-    let content = '';
-    $$('.article-body-commercial-selector > p', html).each(async function (a) {
-      content = $$(this).text();
+    // article['content'] = content;
+    $$('.article-body-commercial-selector > p', html).each(async function(a) {
+      sections.push($$(this).text());
     });
 
-    article['content'] = content;
+    article['contentSections'] = sections;
     res.send(article);
     newPage.close();
   } else {
+    console.log('y');
     const page = await browser.newPage();
     const articlesArray = [];
     await page.goto(url);
@@ -107,15 +101,13 @@ const scarpArticle = async (urlLink, res) => {
           console.log(article.url);
           const html = await newPage.content();
           const $$ = cheerio.load(html);
-          // const content = $$('.article-body-commercial-selector').text();
           let content = '';
-          $$('.article-body-commercial-selector > p', html).each(
-            async function (a) {
-              content = $$(this).text();
-            }
-          );
+          // const content = $$('.article-body-commercial-selector').text();
+          $$('.article-body-commercial-selector > p', html).each(async function(a) {
+            sections.push($$(this).text());
+          });
 
-          article['content'] = content;
+          article['contentSections'] = sections;
           articlesArray.push(article);
 
           newPage.close();
