@@ -2,7 +2,6 @@ const cheerio = require('cheerio');
 const express = require('express');
 const puppeteer = require('puppeteer');
 require('dotenv').config();
-
 const cors = require('cors');
 var corsOptions = {
   origin: '*',
