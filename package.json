@@ -9,19 +9,23 @@
   "scripts": {
     "start": "nodemon index.js",
     "start:prod": "node dist/main",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "AWS_LAMBDA_FUNCTION_NAME=true node index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "cheerio": "^1.0.0-rc.10",
+    "chrome-aws-lambda": "8.0.2",
     "cors": "^2.8.5",
     "cross-env": "^7.0.3",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "nodemon": "^2.0.15",
-    "puppeteer": "^5.0.0",
-    "puppeteer-core": "^13.0.0"
+    "puppeteer-core": "^8.0.0"
+  },
+  "devDependencies": {
+    "puppeteer": "^13.5.2"
   }
 }

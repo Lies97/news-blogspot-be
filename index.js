@@ -1,6 +1,7 @@
 const cheerio = require('cheerio');
 const express = require('express');
-const puppeteer = require('puppeteer');
+// const puppeteer = require('puppeteer-core');
+// const chrome = require('chrome-aws-lambda');
 require('dotenv').config();
 const cors = require('cors');
 var corsOptions = {
@@ -14,10 +15,25 @@ const port = process.env.PORT || 4000;
 app.use(cors(corsOptions));
 const url = 'https://www.theguardian.com/uk';
 
+let chrome = {};
+let puppeteer;
+
+if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+  // running on the Vercel platform.
+  chrome = require('chrome-aws-lambda');
+  puppeteer = require('puppeteer-core');
+} else {
+  // running locally.
+  puppeteer = require('puppeteer');
+}
+
 const webScarping = async (res) => {
   const browser = await puppeteer.launch({
-    ignoreDefaultArgs: ['--disable-extensions'],
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    args: ['--hide-scrollbars', '--disable-web-security'],
+    defaultViewport: chrome.defaultViewport,
+    executablePath: await chrome.executablePath,
+    headless: true,
+    ignoreHTTPSErrors: true,
   });
   const articles = [];
 
@@ -55,8 +71,11 @@ const webScarping = async (res) => {
 
 const scarpArticle = async (urlLink, res) => {
   const browser = await puppeteer.launch({
-    ignoreDefaultArgs: ['--disable-extensions'],
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    args: ['--hide-scrollbars', '--disable-web-security'],
+    defaultViewport: chrome.defaultViewport,
+    executablePath: await chrome.executablePath,
+    headless: true,
+    ignoreHTTPSErrors: true,
   });
 
   const page = await browser.newPage();
