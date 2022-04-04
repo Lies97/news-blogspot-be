@@ -9,8 +9,7 @@
   "scripts": {
     "start": "nodemon index.js",
     "start:prod": "node dist/main",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "AWS_LAMBDA_FUNCTION_NAME=true node index.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
