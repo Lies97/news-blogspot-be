@@ -100,11 +100,19 @@ const scarpArticle = async (urlLink, res) => {
 };
 
 app.get('/api/articles', (req, res) => {
-  webScarping(res);
+  try {
+    webScarping(res);
+  } catch (err) {
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
 });
 
 app.get('/api/article/:url', (req, res) => {
-  scarpArticle(req.params.url, res);
+  try {
+    scarpArticle(req.params.url, res);
+  } catch (err) {
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
 });
 
 app.listen(port, () => {
