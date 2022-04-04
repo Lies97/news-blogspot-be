@@ -29,7 +29,7 @@ if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
 
 const webScarping = async (res) => {
   const browser = await puppeteer.launch({
-    args: ['--hide-scrollbars', '--disable-web-security'],
+    args: [...chrome.args, '--hide-scrollbars', '--disable-web-security'],
     defaultViewport: chrome.defaultViewport,
     executablePath: await chrome.executablePath,
     headless: true,
@@ -71,7 +71,7 @@ const webScarping = async (res) => {
 
 const scarpArticle = async (urlLink, res) => {
   const browser = await puppeteer.launch({
-    args: ['--hide-scrollbars', '--disable-web-security'],
+    args: [...chrome.args, '--hide-scrollbars', '--disable-web-security'],
     defaultViewport: chrome.defaultViewport,
     executablePath: await chrome.executablePath,
     headless: true,
