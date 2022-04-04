@@ -1,7 +1,6 @@
 const cheerio = require('cheerio');
 const express = require('express');
-// const puppeteer = require('puppeteer-core');
-// const chrome = require('chrome-aws-lambda');
+const chromium = require('chrome-aws-lambda');
 require('dotenv').config();
 const cors = require('cors');
 var corsOptions = {
@@ -15,27 +14,38 @@ const port = process.env.PORT || 4000;
 app.use(cors(corsOptions));
 const url = 'https://www.theguardian.com/uk';
 
-let chrome = {};
-let puppeteer;
+const getBrowserInstance = async () => {
+  const executablePath = await chromium.executablePath;
 
-if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-  // running on the Vercel platform.
-  chrome = require('chrome-aws-lambda');
-  puppeteer = require('puppeteer-core');
-} else {
-  // running locally.
-  puppeteer = require('puppeteer');
-}
+  if (!executablePath) {
+    // running locally
+    const puppeteer = require('puppeteer');
+    return puppeteer.launch({
+      args: chromium.args,
+      headless: true,
+      defaultViewport: {
+        width: 1280,
+        height: 720,
+      },
+      ignoreHTTPSErrors: true,
+    });
+  }
 
-const webScarping = async (res) => {
-  const browser = await puppeteer.launch({
-    args: [...chrome.args, '--hide-scrollbars', '--disable-web-security'],
-    defaultViewport: chrome.defaultViewport,
-    executablePath: await chrome.executablePath,
-    headless: true,
+  return chromium.puppeteer.launch({
+    args: chromium.args,
+    defaultViewport: {
+      width: 1280,
+      height: 720,
+    },
+    executablePath,
+    headless: chromium.headless,
     ignoreHTTPSErrors: true,
   });
-  
+};
+
+const webScarping = async (res) => {
+  const browser = await getBrowserInstance();
+
   const articles = [];
 
   const page = await browser.newPage();
@@ -45,40 +55,33 @@ const webScarping = async (res) => {
   const html = await page.content();
   const $ = cheerio.load(html);
 
-  res.status(200).send({ success: 'Open Browser Success'});
-  // $('.fc-item__container', html).each(function () {
-  //   const title = $(this)
-  //     .find('.fc-item__title')
-  //     .text()
-  //     .replace('\n', '')
-  //     .trim();
-  //   const url = $(this).find('a').attr('href');
-  //   const thumbnail = $(this)
-  //     .find('.fc-item__image-container > picture > img')
-  //     .attr('src');
+  $('.fc-item__container', html).each(function () {
+    const title = $(this)
+      .find('.fc-item__title')
+      .text()
+      .replace('\n', '')
+      .trim();
+    const url = $(this).find('a').attr('href');
+    const thumbnail = $(this)
+      .find('.fc-item__image-container > picture > img')
+      .attr('src');
 
-  //   const description = $(this)
-  //     .find('.fc-item__standfirst')
-  //     .text()
-  //     .replace('\n', '')
-  //     .trim();
-  //   if (thumbnail && description) {
-  //     articles.push({ title, url, thumbnail, description });
-  //   }
-  // });
+    const description = $(this)
+      .find('.fc-item__standfirst')
+      .text()
+      .replace('\n', '')
+      .trim();
+    if (thumbnail && description) {
+      articles.push({ title, url, thumbnail, description });
+    }
+  });
 
   await browser.close();
-  // res.send(articles);
+  res.send(articles);
 };
 
 const scarpArticle = async (urlLink, res) => {
-  const browser = await puppeteer.launch({
-    args: [...chrome.args, '--hide-scrollbars', '--disable-web-security'],
-    defaultViewport: chrome.defaultViewport,
-    executablePath: await chrome.executablePath,
-    headless: true,
-    ignoreHTTPSErrors: true,
-  });
+  const browser = await getBrowserInstance();
 
   const page = await browser.newPage();
   await page.goto(url);
