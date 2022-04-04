@@ -35,6 +35,7 @@ const webScarping = async (res) => {
     headless: true,
     ignoreHTTPSErrors: true,
   });
+  
   const articles = [];
 
   const page = await browser.newPage();
@@ -44,29 +45,30 @@ const webScarping = async (res) => {
   const html = await page.content();
   const $ = cheerio.load(html);
 
-  $('.fc-item__container', html).each(function () {
-    const title = $(this)
-      .find('.fc-item__title')
-      .text()
-      .replace('\n', '')
-      .trim();
-    const url = $(this).find('a').attr('href');
-    const thumbnail = $(this)
-      .find('.fc-item__image-container > picture > img')
-      .attr('src');
+  res.status(200).send({ success: 'Open Browser Success'});
+  // $('.fc-item__container', html).each(function () {
+  //   const title = $(this)
+  //     .find('.fc-item__title')
+  //     .text()
+  //     .replace('\n', '')
+  //     .trim();
+  //   const url = $(this).find('a').attr('href');
+  //   const thumbnail = $(this)
+  //     .find('.fc-item__image-container > picture > img')
+  //     .attr('src');
 
-    const description = $(this)
-      .find('.fc-item__standfirst')
-      .text()
-      .replace('\n', '')
-      .trim();
-    if (thumbnail && description) {
-      articles.push({ title, url, thumbnail, description });
-    }
-  });
+  //   const description = $(this)
+  //     .find('.fc-item__standfirst')
+  //     .text()
+  //     .replace('\n', '')
+  //     .trim();
+  //   if (thumbnail && description) {
+  //     articles.push({ title, url, thumbnail, description });
+  //   }
+  // });
 
   await browser.close();
-  res.send(articles);
+  // res.send(articles);
 };
 
 const scarpArticle = async (urlLink, res) => {
